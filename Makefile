@@ -9,7 +9,7 @@ VER_FLAGS = -D_GNU_SOURCE
 
 MEASUREMENTS = 0
 
-ifeq ($(VERSION),DEBUG) 
+ifeq ($(VERSION),DEBUG)
 CFLAGS = -O0 -ggdb -Wall -g -fno-inline
 VER_FLAGS += -DDEBUG
 endif
@@ -71,7 +71,11 @@ endif
 ifeq ($(PLATFORM_NUMA),1) #give PLATFORM_NUMA=1 for NUMA
 CFLAGS += -DNUMA
 LDFLAGS += -lnuma
-endif 
+endif
+
+ifeq ($(TIGHT_ALLOC),1) #give PLATFORM_NUMA=1 for NUMA
+CFLAGS += -DTIGHT_ALLOC
+endif
 
 VER_FLAGS += -D$(PLATFORM)
 
@@ -79,7 +83,7 @@ all: libssmem.a ssmem_test
 
 default: ssmem_test
 
-ssmem.o: $(SRC)/ssmem.c 
+ssmem.o: $(SRC)/ssmem.c
 	$(CC) $(VER_FLAGS) -c $(SRC)/ssmem.c $(CFLAGS) -I./$(INCLUDE)
 
 ifeq ($(MEASUREMENTS),1)
@@ -90,13 +94,13 @@ endif
 libssmem.a: ssmem.o $(INCLUDE)/ssmem.h $(MEASUREMENTS_FILES)
 	@echo Archive name = libssmem.a
 	ar -r libssmem.a ssmem.o $(MEASUREMENTS_FILES)
-	rm -f *.o	
+	rm -f *.o
 
 ssmem_test.o: $(SRC)/ssmem_test.c libssmem.a
 	$(CC) $(VER_FLAGS) -c $(SRC)/ssmem_test.c $(CFLAGS) -I./$(INCLUDE)
 
 ssmem_test: libssmem.a ssmem_test.o
-	$(CC) $(VER_FLAGS) -o ssmem_test ssmem_test.o $(CFLAGS) $(LDFLAGS) -I./$(INCLUDE) -L./ 
+	$(CC) $(VER_FLAGS) -o ssmem_test ssmem_test.o $(CFLAGS) $(LDFLAGS) -I./$(INCLUDE) -L./
 
 
 clean:
